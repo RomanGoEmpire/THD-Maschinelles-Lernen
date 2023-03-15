@@ -48,7 +48,7 @@ plot(
   xlim = c(46, 230),
   ylim = c(5, 26.1),
   pch = 16,
-  col = "blue",
+  col = "#3f88c5",
   cex = 0.7,
   
 )
