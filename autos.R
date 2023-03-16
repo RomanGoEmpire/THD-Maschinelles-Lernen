@@ -1,3 +1,4 @@
+# Setup ------------------------------------------------------------------------
 WD = getwd()
 setwd(WD)
 
@@ -9,7 +10,6 @@ data <-
     fill = TRUE,
     stringsAsFactors = TRUE
   )
-
 
 data[, "Herkunft"] <- as.factor(data[, "Herkunft"])
 
