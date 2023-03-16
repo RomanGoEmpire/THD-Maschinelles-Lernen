@@ -23,7 +23,7 @@ To view and run the R code, you will need to have R installed on your computer.
 To clone this repository, run the following command:
 
 ```
-git clone https://github.com/username/THD-Maschinelles-Lernen.git
+git clone https://github.com/RomanGoEmpire/THD-Maschinelles-Lernen
 ```
 
 Then, navigate to the repository directory and open the R files, you want to see.
