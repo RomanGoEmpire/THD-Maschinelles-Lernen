@@ -1,4 +1,5 @@
 # Setup ------------------------------------------------------------------------
+# Task can be found in the script on page 45
 WD = getwd()
 setwd(WD)
 
@@ -54,6 +55,7 @@ plot(
 )
 
 # Aufgabe 4 --------------------------------------------------------------------
+verbrauch <- data[, "Verbrauch"]
 mean_by_continent <-
   aggregate(verbrauch ~ data[, "Herkunft"], data = data, mean)
 names(mean_by_continent) <- c("Herkunft", "Verbrauch")
