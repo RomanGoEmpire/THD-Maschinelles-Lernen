@@ -35,6 +35,7 @@ sd(hubraum)
 
 # 1 (=Amerika), 2 (=Europa) und 3 (=Asien)
 table(data$Herkunft)
+  
 
 # Aufgabe 3 --------------------------------------------------------------------
 x <- data[, "Leistung"]
@@ -119,7 +120,7 @@ boxplot(
   ylab = "Verbrauch",
   main = "Vergleich Verbrauch anhand Herkunft",
   names = c("Usa", "Europe", "Asia"),
-  col = c("#3f88c5", "#ffba08", "#d00000")
+  col = c("#3f88c5", "#ffba08", "#d00000"),
 )
 # Aufgabe 7 --------------------------------------------------------------------
 
