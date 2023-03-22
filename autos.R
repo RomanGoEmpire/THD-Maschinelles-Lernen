@@ -1,13 +1,13 @@
-# Setup ------------------------------------------------------------------------
+# Setup ----------------------------------------------------------------------
 # Task can be found in the script on page 45
 WD = getwd()
 setwd(WD)
 
 data <-
-  read.csv2(
+  read.csv(
     "Daten/autos.csv",
     header = TRUE,
-    sep = ";",
+    sep = ",",
     fill = TRUE,
     stringsAsFactors = TRUE
   )
@@ -16,7 +16,7 @@ data[, "Herkunft"] <- as.factor(data[, "Herkunft"])
 
 summary(data)
 
-# Aufgabe 2 --------------------------------------------------------------------
+# Aufgabe 2 ------------------------------------------------------------------
 verbrauch <- data[, "Verbrauch"]
 zylinder <- data[, "Zylinder"]
 hubraum <- data[, "Hubraum"]
@@ -35,11 +35,15 @@ sd(hubraum)
 
 # 1 (=Amerika), 2 (=Europa) und 3 (=Asien)
 table(data$Herkunft)
+----
+# Alternativ
+summary(daten)
   
 
-# Aufgabe 3 --------------------------------------------------------------------
+# Aufgabe 3 ------------------------------------------------------------------
 x <- data[, "Leistung"]
 y <- data[, "Verbrauch"]
+plot(x,y)
 plot(
   x,
   y,
@@ -55,14 +59,24 @@ plot(
   
 )
 
-# Aufgabe 4 --------------------------------------------------------------------
+# Aufgabe 4 ------------------------------------------------------------------
 verbrauch <- data[, "Verbrauch"]
 mean_by_continent <-
   aggregate(verbrauch ~ data[, "Herkunft"], data = data, mean)
 names(mean_by_continent) <- c("Herkunft", "Verbrauch")
 mean_by_continent # 1 (=Amerika), 2 (=Europa) und 3 (=Asien)
 
-# Aufgabe 5 --------------------------------------------------------------------
+----
+# Alternativ
+usa <- subset(data, Herkunft == "1")
+europe <- subset(data, Herkunft == "2")
+asia <- subset(data, Herkunft == "3")
+
+mean(usa)
+mean(europe)
+mean(asia)
+
+# Aufgabe 5 ------------------------------------------------------------------
 usa <- subset(data, Herkunft == "1")
 europe <- subset(data, Herkunft == "2")
 asia <- subset(data, Herkunft == "3")
@@ -105,7 +119,7 @@ points(
   cex = 0.7,
   col = "#d00000"
 )
-# Aufgabe 6 --------------------------------------------------------------------
+# Aufgabe 6 ------------------------------------------------------------------
 
 usa <- subset(data, Herkunft == "1")
 europe <- subset(data, Herkunft == "2")
@@ -122,7 +136,7 @@ boxplot(
   names = c("Usa", "Europe", "Asia"),
   col = c("#3f88c5", "#ffba08", "#d00000"),
 )
-# Aufgabe 7 --------------------------------------------------------------------
+# Aufgabe 7 ------------------------------------------------------------------
 
 verbrauch <- data[, "Verbrauch"]
 leistung <- data[, "Leistung"]
