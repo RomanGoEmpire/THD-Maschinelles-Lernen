@@ -1,5 +1,12 @@
 # Setup ------------------------------------------------------------------------
 # Task can be found in the script on page 71
+
+# install.packages("tree")
+# install.packages("ANN2")
+
+library(tree)
+library(ANN2)
+
 WD = getwd()
 setwd(WD)
 
@@ -73,75 +80,138 @@ y <- data$CoolingLoad
 prognosis <- model$fitted.values
 Error <- mean(abs(y - prognosis))
 Error
+
+
 # ------------------------------------------------------------------------------
-library(tree)
 
-Baum <-
-  tree(
-    CoolingLoad ~ RelativeCompactness + WallArea + RoofArea + OverallHeight +
-      Orientation + GlazingArea + GlazingAreaDistribution,
-    data = data
-  )
-plot(Baum)
-text(Baum)
+best_model = NULL
+best = c(1000)
 
-tuning <- cv.tree(Baum, K = 5)
+for (i in c(1:10000)) {
+  n <- length(data[, 1])
+  index <- sample(1:n, n, replace = FALSE)
+  data <- data[index, ]
+  
+  n <- nrow(data) * 0.7
+  data.train <- data[1:n, ]
+  data.test <- data[(n + 1):768, ]
+  
+  tree <-
+    tree(
+      CoolingLoad ~ RelativeCompactness + WallArea + RoofArea + OverallHeight +
+        Orientation + GlazingArea + GlazingAreaDistribution,
+      data = data.train
+    )
+  tuning <- cv.tree(tree, K = 5)
+  t <- which.min(tuning$dev)
+  Anzahl.Endknoten <- tuning$size[t]
+  
+  model <- prune.tree(tree, best = Anzahl.Endknoten)
+  
+  # Berechnung der Prognoseergebnisse auf den Testdaten:
+  
+  X.test <-
+    data.test[, c(
+      "RelativeCompactness",
+      "WallArea",
+      "RoofArea",
+      "OverallHeight",
+      "Orientation",
+      "GlazingArea",
+      "GlazingAreaDistribution"
+    )]
+  prognosen <- predict(model, X.test)
+  
+  # Berechnung des mittleren Prognosefehlers (MAD)
+  
+  y.test <- data.test[, "CoolingLoad"]
+  mean = mean(abs(y.test - prognosen))
+  
+  if (mean < best) {
+    print(mean)
+    best_model = model
+    best = mean
+  }
+}
 
-tuning
-
-plot(tuning)
-
-t <- which.min(tuning$dev)
-Anzahl.Endknoten <- tuning$size[t]
-
-model <- prune.tree(Baum, best = Anzahl.Endknoten)
 plot(model)
 text(model)
 
 # ------------------------------------------------------------------------------
-n <- length(data[, 1])
-index <- sample(1:n, n, replace = FALSE)
-data <- data[index, ]
-
-data.train <- data[1:537, ]
-data.test <- data[538:768, ]
-
-# Berechnung des Modells auf den Trainingsdaten:
-# Achtung: im Befehl 'cv.tree' steht bei 'data' nun Daten.train !!!
-
-Baum <-
-  tree(
-    CoolingLoad ~ RelativeCompactness + WallArea + RoofArea + OverallHeight +
-      Orientation + GlazingArea + GlazingAreaDistribution,
-    data = data.train
-  )
-tuning <- cv.tree(Baum, K = 5)
-t <- which.min(tuning$dev)
-Anzahl.Endknoten <- tuning$size[t]
-
-model <- prune.tree(Baum, best = Anzahl.Endknoten)
-plot(model)
-text(model)
+best_model = NULL
+best_train = c(1000)
+best_test = c(1000)
+best_average = c(1000)
+best_difference = c(1000)
 
 
-# Berechnung der Prognoseergebnisse auf den Testdaten:
+for (i in c(1:1000)) {
+  n <- length(data[, 1])
+  index <- sample(1:n, n, replace = FALSE)
+  data <- data[index, ]
+  
+  n <- nrow(data) * 0.6
+  data.train <- data[1:n, ]
+  data.test <- data[(n + 1):768, ]
+  
+  
+  X <-
+    model.matrix(
+      CoolingLoad ~ RelativeCompactness + WallArea + RoofArea + OverallHeight +
+        Orientation + GlazingArea + GlazingAreaDistribution,
+      data = data.train
+    )
+  X <- X[, -1]   # entferne den Intercept
+  y <- data.train$CoolingLoad
+  
+  model <-
+    neuralnetwork(
+      X,
+      y,
+      hidden.layers = c(8, 4, 2),
+      regression = TRUE,
+      loss.type = "squared",
+      learn.rates = 0.01,
+      n.epochs = 250,
+      batch.size = 16,
+      verbose = FALSE
+    )
+  
+  X.test <-
+    model.matrix(
+      CoolingLoad ~ RelativeCompactness + WallArea + RoofArea + OverallHeight +
+        Orientation + GlazingArea + GlazingAreaDistribution,
+      data = data.test
+    )
+  X.test <- X.test[, -1]   # entferne den Intercept
+  y.test <- data.test[, "CoolingLoad"]
+  
+  
+  prognosen <- predict(model, X)$predictions
+  mean_train = mean(abs(prognosen - y))
+  prognosen <- predict(model, X.test)$predictions
+  mean_test = mean(abs(prognosen - y.test))
+  mean_average = (mean_train + mean_test) / 2
+  mean_difference = mean_test / mean_train
+  # mean_train
+  # mean_test
+  # mean_average
+  # mean_difference
+  
+  
+  if (best_train > mean_train &&
+      best_test > mean_test && best_average > mean_average) {
+    best_model = model
+    best_train = mean_train
+    best_test = mean_test
+    best_average = mean_average
+    print("New Best")
+    print(paste("Train:", best_train))
+    print(paste("Test:", best_test))
+    print(paste("Average:", best_average))
+  }
+}
 
-X.test <-
-  data.test[, c(
-    "RelativeCompactness",
-    "WallArea",
-    "RoofArea",
-    "OverallHeight",
-    "Orientation",
-    "GlazingArea",
-    "GlazingAreaDistribution"
-  )]
-prognosen <- predict(model, X.test)
 
-# Berechnung des mittleren Prognosefehlers (MAD)
-
-y.test <- data.test[, "CoolingLoad"]
-mean(abs(y.test - prognosen))
-
-
+save(model, file = "trained_model.RData")
 # Task 4 -----------------------------------------------------------------------
