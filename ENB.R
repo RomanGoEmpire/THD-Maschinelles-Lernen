@@ -63,7 +63,7 @@ for (name in colnames(data)) {
 }
 
 # Task 3 -----------------------------------------------------------------------
-
+# Regression
 print(min(data$CoolingLoad))
 print(max(data$CoolingLoad))
 
@@ -83,7 +83,7 @@ Error
 
 
 # ------------------------------------------------------------------------------
-
+# Entscheidungsbaum
 best_model = NULL
 best = c(1000)
 
@@ -138,6 +138,7 @@ plot(model)
 text(model)
 
 # ------------------------------------------------------------------------------
+# Neuronales Netzwerk
 best_model = NULL
 best_train = c(1000)
 best_test = c(1000)
@@ -212,6 +213,4 @@ for (i in c(1:1000)) {
   }
 }
 
-
-save(model, file = "trained_model.RData")
 # Task 4 -----------------------------------------------------------------------
