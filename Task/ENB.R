@@ -34,7 +34,7 @@ names(data) <- c(
   "CoolingLoad"
 )
 
-data[1:5,]
+data[1:5, ]
 
 summary(data)
 
@@ -62,7 +62,6 @@ for (name in colnames(data)) {
 
 # Task 3 -----------------------------------------------------------------------
 
-
 ## ---- Regression ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 model <-
@@ -81,19 +80,18 @@ min <- min(data$CoolingLoad)
 max <- max(data$CoolingLoad)
 range <- max - min
 
-
 ## ---- Entscheidungsbaum ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 shuffle_data <- function(data) {
   n <- length(data[, 1])
   index <- sample(1:n, n, replace = FALSE)
-  data <- data[index, ]
+  data <- data[index,]
   return(data)
 }
 
 train_test_divider <- function(data, percentage) {
   n <- nrow(data) * percentage
-  return (list(train = data[1:n, ], test = data[(n + 1):nrow(data), ]))
+  return (list(train = data[1:n,], test = data[(n + 1):nrow(data),]))
 }
 
 
@@ -138,19 +136,18 @@ mean = mean(abs(y.test - prognosen))
 plot(model)
 text(model)
 
-
 ## ---- Neuronales Netzwerk ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 shuffle_data <- function(data) {
   n <- length(data[, 1])
   index <- sample(1:n, n, replace = FALSE)
-  data <- data[index, ]
+  data <- data[index,]
   return(data)
 }
 
 train_test_divider <- function(data, percentage) {
   n <- nrow(data) * percentage
-  return (list(train = data[1:n, ], test = data[(n + 1):nrow(data), ]))
+  return (list(train = data[1:n,], test = data[(n + 1):nrow(data),]))
 }
 
 create_model_matrix <- function(target_and_predictors, data) {
@@ -202,10 +199,11 @@ mean_test <- calculate_mean(model, X_test, y_test)
 mean_train
 mean_test
 
-
 # ---- LAB SECTION ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-tries = 100
+## Try out one configuration for multiple times to find a good seed
+
+tries = 1
 
 best_model = NULL
 best_train = 10000
@@ -222,11 +220,11 @@ for (i in c(1:tries)) {
     neuralnetwork(
       X,
       y,
-      hidden.layers = c(8, 4, 2),
-      loss.type = "huber",
-      learn.rates = 0.01,
+      hidden.layers = c(4, 4),
+      loss.type = "squared",
+      learn.rates = 0.03,
       n.epochs =  250,
-      batch.size = 8,
+      batch.size = 2,
       regression = TRUE,
       verbose = FALSE
     )
@@ -243,15 +241,24 @@ for (i in c(1:tries)) {
     best_train = mean_train
     best_test = mean_test
     best_average = mean_average
-    print(paste("Try:",i))
-    print(paste("Train:",best_train)))
-    print(paste("Test:",best_test)))
-    print(paste("Average:",best_average)))
+    print(paste("Try:", i))
+    print(paste("Train:", best_train))
+    print(paste("Test:", best_test))
+    print(paste("Average:", best_average))
   }
 }
 
+hist(results)
 
-# ----
+# ------------------------------------------------------------------------------
+
+## Trying out different settings and storing them into "neural_network.csv"
+
+vector_to_string <- function(my_vector) {
+  my_string <- paste(my_vector, collapse = "-")
+  return(my_string)
+}
+
 
 hidden_layers <- list(c(4, 4),
                       c(5, 2),
@@ -271,33 +278,6 @@ batch_sizes <- list(2, 4, 8)
 empty_matrix <- matrix(nrow = 0, ncol = 7)
 neural_network_results <- data.frame(empty_matrix)
 
-X <-
-  model.matrix(
-    CoolingLoad ~ RelativeCompactness + WallArea + RoofArea + OverallHeight +
-      Orientation + GlazingArea + GlazingAreaDistribution,
-    data = data.train
-  )
-
-X <- X[, -1]   # entferne den Intercept
-
-y <- data.train$CoolingLoad
-
-X.test <-
-  model.matrix(
-    CoolingLoad ~ RelativeCompactness + WallArea + RoofArea + OverallHeight +
-      Orientation + GlazingArea + GlazingAreaDistribution,
-    data = data.test
-  )
-
-X.test <- X.test[, -1]   # entferne den Intercept
-
-y.test <- data.test[, "CoolingLoad"]
-
-
-vector_to_string <- function(my_vector) {
-  my_string <- paste(my_vector, collapse = "-")
-  return(my_string)
-}
 
 combinations <-
   expand.grid(hidden_layers, loss_types, learning_rates, epochs, batch_sizes)
@@ -311,23 +291,20 @@ names(combinations) <-
 
 for (i in (c(1:1008))) {
   print(i)
-  current_combination <- combinations[i,]
+  current_combination <- combinations[i, ]
   hidden_layer <- unlist(current_combination$hidden_layers)
   loss_type <- unlist(current_combination$loss_types)
   learning_rate <- unlist(current_combination$learning_rates)
   epoch <- unlist(current_combination$epochs)
   batch_size <- unlist(current_combination$batch_sizes)
   
-  tries = 100
+  tries = 1
   
   best_model = NULL
   best_train = 10000
   best_test = 10000
   best_average = 10000
   best_difference = 10000
-  
-  
-  results <- integer(tries)
   
   
   for (i in c(1:tries)) {
@@ -344,16 +321,9 @@ for (i in (c(1:1008))) {
         verbose = FALSE
       )
     
-    prognosen <- predict(model, X)$predictions
-    mean_train = mean(abs(prognosen - y))
-    
-    prognosen <- predict(model, X.test)$predictions
-    mean_test = mean(abs(prognosen - y.test))
-    
+    mean_train <- calculate_mean(model, X, y)
+    mean_test <- calculate_mean(model, X_test, y_test)
     mean_average = (mean_train + mean_test) / 2
-    mean_difference = mean_test / mean_train
-    
-    results[i] = mean_average
     
     if (best_train > mean_train &&
         best_test > mean_test && best_average > mean_average) {
@@ -377,7 +347,6 @@ for (i in (c(1:1008))) {
     )
   ))
   neural_network_results <- rbind(neural_network_results, new_row)
-  
 }
 
 # Headers
