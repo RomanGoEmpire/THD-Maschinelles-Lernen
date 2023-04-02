@@ -34,7 +34,7 @@ names(data) <- c(
   "CoolingLoad"
 )
 
-data[1:5, ]
+data[1:5,]
 
 summary(data)
 
@@ -87,13 +87,13 @@ range <- max - min
 shuffle_data <- function(data) {
   n <- length(data[, 1])
   index <- sample(1:n, n, replace = FALSE)
-  data <- data[index,]
+  data <- data[index, ]
   return(data)
 }
 
 train_test_divider <- function(data, percentage) {
   n <- nrow(data) * percentage
-  return (list(train = data[1:n,], test = data[(n + 1):nrow(data),]))
+  return (list(train = data[1:n, ], test = data[(n + 1):nrow(data), ]))
 }
 
 
@@ -144,13 +144,13 @@ text(model)
 shuffle_data <- function(data) {
   n <- length(data[, 1])
   index <- sample(1:n, n, replace = FALSE)
-  data <- data[index,]
+  data <- data[index, ]
   return(data)
 }
 
 train_test_divider <- function(data, percentage) {
   n <- nrow(data) * percentage
-  return (list(train = data[1:n,], test = data[(n + 1):nrow(data),]))
+  return (list(train = data[1:n, ], test = data[(n + 1):nrow(data), ]))
 }
 
 create_model_matrix <- function(target_and_predictors, data) {
@@ -183,7 +183,6 @@ y <- train$CoolingLoad
 X_test <- create_model_matrix(target_and_predictors, test)
 y_test <- test$CoolingLoad
 
-
 model <-
   neuralnetwork(
     X,
@@ -197,8 +196,6 @@ model <-
     verbose = FALSE
   )
 
-
-
 mean_train <- calculate_mean(model, X, y)
 mean_test <- calculate_mean(model, X_test, y_test)
 
@@ -208,15 +205,53 @@ mean_test
 
 # ---- LAB SECTION ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-# shuffle
-n <- length(data[, 1])
-index <- sample(1:n, n, replace = FALSE)
-data <- data[index, ]
-# split data into test and training data
-n <- nrow(data) * 0.5
-data.train <- data[1:n, ]
-data.test <- data[(n + 1):768, ]
+tries = 100
 
+best_model = NULL
+best_train = 10000
+best_test = 10000
+best_average = 10000
+best_difference = 10000
+
+
+results <- integer(tries)
+
+
+for (i in c(1:tries)) {
+  model <-
+    neuralnetwork(
+      X,
+      y,
+      hidden.layers = c(8, 4, 2),
+      loss.type = "huber",
+      learn.rates = 0.01,
+      n.epochs =  250,
+      batch.size = 8,
+      regression = TRUE,
+      verbose = FALSE
+    )
+  
+  mean_train <- calculate_mean(model, X, y)
+  mean_test <- calculate_mean(model, X_test, y_test)
+  mean_average = (mean_train + mean_test) / 2
+  
+  results[i] = mean_average
+  
+  if (best_train > mean_train &&
+      best_test > mean_test && best_average > mean_average) {
+    best_model = model
+    best_train = mean_train
+    best_test = mean_test
+    best_average = mean_average
+    print(paste("Try:",i))
+    print(paste("Train:",best_train)))
+    print(paste("Test:",best_test)))
+    print(paste("Average:",best_average)))
+  }
+}
+
+
+# ----
 
 hidden_layers <- list(c(4, 4),
                       c(5, 2),
@@ -276,7 +311,7 @@ names(combinations) <-
 
 for (i in (c(1:1008))) {
   print(i)
-  current_combination <- combinations[i, ]
+  current_combination <- combinations[i,]
   hidden_layer <- unlist(current_combination$hidden_layers)
   loss_type <- unlist(current_combination$loss_types)
   learning_rate <- unlist(current_combination$learning_rates)
