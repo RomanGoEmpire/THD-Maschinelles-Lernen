@@ -203,7 +203,7 @@ mean_test
 
 ## Try out one configuration for multiple times to find a good seed
 
-tries = 100
+tries = 1000
 
 best_model = NULL
 best_train = 10000
@@ -221,11 +221,11 @@ for (i in c(1:tries)) {
     neuralnetwork(
       X,
       y,
-      hidden.layers = c(7,4,3,2),
+      hidden.layers = c(8,4,3,2),
       loss.type = "squared",
       learn.rates = 0.01,
       n.epochs =  500,
-      batch.size = 4,
+      batch.size = 8,
       regression = TRUE,
       verbose = FALSE
     ) 
