@@ -187,11 +187,11 @@ model <-
     hidden.layers = c(8, 4, 2),
     loss.type = "absolute",
     learn.rates = 0.01,
-    n.epochs =  200,
-    batch.size = 4,
+    n.epochs =  250,
+    batch.size = 8,
     regression = TRUE,
     verbose = FALSE
-  )
+  )  
 
 mean_train <- calculate_mean(model, X, y)
 mean_test <- calculate_mean(model, X_test, y_test)
@@ -203,7 +203,7 @@ mean_test
 
 ## Try out one configuration for multiple times to find a good seed
 
-tries = 1
+tries = 100
 
 best_model = NULL
 best_train = 10000
@@ -216,19 +216,19 @@ results <- integer(tries)
 
 
 for (i in c(1:tries)) {
+  
   model <-
     neuralnetwork(
       X,
       y,
-      hidden.layers = c(4, 4),
+      hidden.layers = c(7,4,3,2),
       loss.type = "squared",
-      learn.rates = 0.03,
-      n.epochs =  250,
-      batch.size = 2,
+      learn.rates = 0.01,
+      n.epochs =  500,
+      batch.size = 4,
       regression = TRUE,
       verbose = FALSE
-    )
-  
+    ) 
   mean_train <- calculate_mean(model, X, y)
   mean_test <- calculate_mean(model, X_test, y_test)
   mean_average = (mean_train + mean_test) / 2
@@ -350,6 +350,7 @@ for (i in (c(1:1008))) {
 }
 
 # Headers
+
 colnames(neural_network_results) <-
   c(
     "hidden_layers",
@@ -362,6 +363,7 @@ colnames(neural_network_results) <-
   )
 
 # save csv
+
 write.csv(
   neural_network_results,
   "neural_network.csv",
@@ -380,6 +382,36 @@ nn_stats <-
   )
 
 nn_stats
+
+## Visualize 
+
+for (name in colnames(nn_stats)) {
+  plot(
+    nn_stats[, name],
+    nn_stats$test,
+    main = paste("Plot", name),
+    xlab = name,
+    ylab = "Test"
+  )
+}
+
+# Regression on results of nn_stats
+
+model <-
+  lm(
+    test ~ hidden_layers + loss_types + learning_rates + epochs +batch_sizes,
+    data = nn_stats
+  )
+model
+
+y <- nn_stats$test
+prognosis <- model$fitted.values
+Error <- mean(abs(y - prognosis))
+Error
+min <- min(data$CoolingLoad)
+max <- max(data$CoolingLoad)
+range <- max - min
+
 
 string_to_vector <- function(my_vector) {
   my_string <- strsplit(my_string, "-")[[1]]
