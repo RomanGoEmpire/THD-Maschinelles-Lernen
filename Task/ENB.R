@@ -48,7 +48,24 @@ data$GlazingAreaDistribution <-
 
 summary(data)
 
+shuffle_data <- function(data) {
+  n <- length(data[, 1])
+  index <- sample(1:n, n, replace = FALSE)
+  data <- data[index,]
+  return(data)
+}
+
+data <- shuffle_data(data)
+
 # Task 2 -----------------------------------------------------------------------
+
+
+# Boxplots aller Variablen
+
+
+# Histogramme aller Variablen
+
+
 
 for (name in colnames(data)) {
   plot(
@@ -81,13 +98,6 @@ max <- max(data$CoolingLoad)
 range <- max - min
 
 ## ---- Entscheidungsbaum ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-
-shuffle_data <- function(data) {
-  n <- length(data[, 1])
-  index <- sample(1:n, n, replace = FALSE)
-  data <- data[index,]
-  return(data)
-}
 
 train_test_divider <- function(data, percentage) {
   n <- nrow(data) * percentage
@@ -162,7 +172,6 @@ calculate_mean <- function(model, X, y) {
   return (mean)
 }
 
-
 data <- shuffle_data(data)
 
 devided_data <- train_test_divider(data, 0.5)
@@ -191,7 +200,7 @@ model <-
     batch.size = 8,
     regression = TRUE,
     verbose = FALSE
-  )  
+  )
 
 mean_train <- calculate_mean(model, X, y)
 mean_test <- calculate_mean(model, X_test, y_test)
@@ -216,19 +225,18 @@ results <- integer(tries)
 
 
 for (i in c(1:tries)) {
-  
   model <-
     neuralnetwork(
       X,
       y,
-      hidden.layers = c(8,4,3,2),
+      hidden.layers = c(8, 4, 3, 2),
       loss.type = "squared",
       learn.rates = 0.01,
       n.epochs =  500,
       batch.size = 8,
       regression = TRUE,
       verbose = FALSE
-    ) 
+    )
   mean_train <- calculate_mean(model, X, y)
   mean_test <- calculate_mean(model, X_test, y_test)
   mean_average = (mean_train + mean_test) / 2
@@ -383,7 +391,7 @@ nn_stats <-
 
 nn_stats
 
-## Visualize 
+## Visualize
 
 for (name in colnames(nn_stats)) {
   plot(
@@ -398,10 +406,8 @@ for (name in colnames(nn_stats)) {
 # Regression on results of nn_stats
 
 model <-
-  lm(
-    test ~ hidden_layers + loss_types + learning_rates + epochs +batch_sizes,
-    data = nn_stats
-  )
+  lm(test ~ hidden_layers + loss_types + learning_rates + epochs + batch_sizes,
+     data = nn_stats)
 model
 
 y <- nn_stats$test
