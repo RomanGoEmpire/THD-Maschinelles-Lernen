@@ -156,7 +156,7 @@ shuffle_data <- function(data) {
 }
 
 train_test_divider <- function(data, percentage) {
-  n <- nrow(data) * percentage
+  n <- round(nrow(data) * percentage)
   return (list(train = data[1:n,], test = data[(n + 1):nrow(data),]))
 }
 
